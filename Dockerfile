@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-# ติดตั้งเครื่องมือพื้นฐานที่จำเป็นและปลอดภัยสำหรับระบบคลาวด์ฟรี
+# ติดตั้งเครื่องมือคอมไพล์พื้นฐานที่จำเป็นและปลอดภัย
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
@@ -15,5 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# สั่งรันระบบ FastAPI เข้าสู่พอร์ตออนไลน์
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "10000"]
+# กำหนดตัวแปรระบบเพื่อให้ Python ค้นหาโฟลเดอร์ภายในโปรเจกต์เจอ 100%
+ENV PYTHONPATH=/app
+
+# สั่งรันระบบผ่านคำสั่งมาตรฐานที่ทำงานร่วมกับระบบสภาพแวดล้อมได้ดีที่สุด
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "10000"]
