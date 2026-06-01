@@ -19,4 +19,4 @@ COPY . .
 ENV PYTHONPATH=/app
 
 # สั่งรันระบบผ่านคำสั่งมาตรฐานที่ทำงานร่วมกับระบบสภาพแวดล้อมได้ดีที่สุด
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "10000"]
+CMD ["python", "app/main.py"]
