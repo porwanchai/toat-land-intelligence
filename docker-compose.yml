@@ -1,0 +1,91 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: toat_land_db
+      POSTGRES_USER: toat
+      POSTGRES_PASSWORD: change_me_in_production
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U toat -d toat_land_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  api:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://toat:change_me_in_production@postgres:5432/toat_land_db
+      - SYNC_DATABASE_URL=postgresql+psycopg2://toat:change_me_in_production@postgres:5432/toat_land_db
+      - REDIS_URL=redis://redis:6379/0
+      - GEMINI_API_KEY=your_gemini_api_key_here
+      - GEMINI_MODEL=gemini-2.0-flash
+      - JWT_SECRET_KEY=generate_with_secrets_token_hex_32
+      - JWT_ALGORITHM=HS256
+      - APP_ENV=development
+      - LOG_LEVEL=INFO
+      - UPLOAD_TEMP_DIR=/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - uploads_tmp:/app/uploads
+
+  worker:
+    build: .
+    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=2
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://toat:change_me_in_production@postgres:5432/toat_land_db
+      - SYNC_DATABASE_URL=postgresql+psycopg2://toat:change_me_in_production@postgres:5432/toat_land_db
+      - REDIS_URL=redis://redis:6379/0
+      - GEMINI_API_KEY=your_gemini_api_key_here
+      - GEMINI_MODEL=gemini-2.0-flash
+      - UPLOAD_TEMP_DIR=/app/uploads
+      - APP_ENV=development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - uploads_tmp:/app/uploads
+
+  flower:
+    image: mher/flower:2.0
+    command: celery --broker=redis://redis:6379/0 flower --port=5555
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_tmp:

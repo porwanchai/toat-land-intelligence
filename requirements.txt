@@ -1,0 +1,55 @@
+# ============================================================
+# TOAT Land Intelligence & Spatial Analysis System
+# Python Dependencies
+# ============================================================
+
+# --- Core API Framework ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.6
+gunicorn>=22.0.0
+python-multipart>=0.0.12       # multipart/form-data file uploads
+
+# --- Configuration & Validation ---
+pydantic>=2.9.2
+pydantic[email]>=2.9.2
+pydantic-settings>=2.5.2
+
+# --- Database (Async) ---
+sqlalchemy[asyncio]>=2.0.36
+asyncpg>=0.29.0                # async PostgreSQL driver for FastAPI
+psycopg2-binary>=2.9.9         # sync driver for Alembic migrations ONLY
+geoalchemy2>=0.15.2            # PostGIS geometry types for SQLAlchemy
+alembic>=1.13.3
+
+# --- Geospatial ETL ---
+geopandas>=1.0.1
+shapely>=2.0.6
+pyproj>=3.7.0
+fiona>=1.10.1
+geojson-pydantic>=1.0.0        # RFC 7946 compliant GeoJSON Pydantic v2 models
+
+# --- AI (Google Gemini — use new SDK, NOT google-generativeai) ---
+google-genai>=1.0.0
+
+# --- Task Queue + Monitoring ---
+celery[redis]>=5.4.0
+redis>=5.1.1
+flower>=2.0.0                  # Celery web monitoring UI
+
+# --- Authentication ---
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# --- PDF Report Generation ---
+weasyprint>=62.3               # HTML→PDF with Thai Noto font support
+
+# --- Utilities ---
+python-magic>=0.4.27           # Real MIME-type detection (not just extension)
+aiofiles>=24.1.0               # Async file I/O
+httpx>=0.27.2                  # Async HTTP client
+
+# --- Testing ---
+pytest>=8.3.3
+pytest-asyncio>=0.24.0
+pytest-mock>=3.14.0
+factory-boy>=3.3.1
